@@ -1,1 +1,1 @@
-# SpendSmart-2
+# SpendSmart
