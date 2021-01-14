@@ -45,7 +45,7 @@ export default class ModalExample extends Component {
       }];
     return (
  <Dropdown
-                label='My Basket'
+                label='My Basket!!!!'
                 data={data}
                 style={styles.myDropdown}
                 />

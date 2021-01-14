@@ -9,7 +9,6 @@ import {
 import { useFonts } from '@use-expo/font';
 import * as Font from 'expo-font';
 import { Block, Button, Text, theme } from "galio-framework";
-import Register from './Register.js';
 let customFonts = {
   'ArgonExtra': require('../assets/font/argon.ttf'),
   'Montserrat': require('../assets/font/Montserrat-Regular.ttf')
@@ -18,6 +17,12 @@ const { height, width } = Dimensions.get("screen");
 
 import argonTheme from "../constants/Theme";
 import Images from "../constants/Images";
+
+console.log("Starting API call")
+    url = "https://dry-sands-39247.herokuapp.com/searching/apple";
+    fetch(url)
+    .then((response) => response.json())
+
 class Onboarding extends React.Component {
   state = {
     fontLoaded: false,
@@ -41,14 +46,14 @@ if (this.state.fontLoaded)
           <Image source={Images.Slogo} style={styles.logo} />
         </Block>
         <Block flex center>
-          <Text style = {styles.introText}>Welcome Back! Please sign in. </Text>
+          <Text style = {styles.introText}>Welcome Back! </Text>
         </Block>
         <Block>
         </Block>
         <Block flex space="between" style={styles.padded}>
             <Block flex space="around" style={{ zIndex: 2 }}>
               <Block center>
-              <Register style = {styles.logIn}/> 
+              
                 {/*<Button
                   style={styles.button}
                   color={'#C1BFBF'}
@@ -59,7 +64,7 @@ if (this.state.fontLoaded)
                 </Button>*/}
                               <Button style={styles.createButton} onPress={() => navigation.navigate("App")} >
                         <Text bold size={18} color={argonTheme.COLORS.WHITE}>
-                          LOGIN
+                          START SAVING
                         </Text>
                       </Button>
               </Block>

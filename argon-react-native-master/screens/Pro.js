@@ -1,7 +1,9 @@
 import React from 'react';
-import { View, ImageBackground, Image, StyleSheet, StatusBar, Dimensions, Platform, Linking, TouchableOpacity} from 'react-native';
+import { View, Image, StyleSheet, StatusBar, Dimensions, Platform, Linking, TouchableOpacity} from 'react-native';
 import { Block, Button, Text, theme } from 'galio-framework';
 import { Table, Row, Rows, TableWrapper, Cell, Col, Cols } from 'react-native-table-component';
+import MapView, {Marker} from 'react-native-maps';
+const loadingGif = require('./loadingGif.gif')
 
 const { height, width } = Dimensions.get('screen');
 import { Images, argonTheme } from '../constants/';
@@ -11,36 +13,73 @@ export default class Pro extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
+      loadingStores: true,
+      location: 0,
+      latitude: 0,
+      longitude: 0,
+      didWork: false,
       tableHead: ['Store', 'Price', 'Distance', 'Select'],
-      tableData: [
-        ['Target', '$10.99', '0.6 miles'],
-        ['Ralphs', '$11.69', '0.8 miles'],
-        ['Walmart', '$10.05', '1.6 miles'],
-        ['Sprouts', '14.99', '1.1 miles'],
-        ['Walmart', '$10.05', '1.6 miles'],
-        ['Sprouts', '14.99', '1.1 miles']
-      ],
+      markersArray: [],
+      tableData: [],
       tableDataRow1: 
-        ['Target', '$10.99', '0.6 miles'],
+        ['Target'],
       tableDataRow2 :
-        ['Ralphs', '$11.69', '0.8 miles'],
+        ['Ralphs'],
       tableDataRow3 : 
-        ['Walmart', '$10.05', '1.6 miles'],
+        ['Walmart'],
       tableDataRow4 : 
-        ['Sprouts', '14.99', '1.1 miles'],
+        ['Sprouts'],
       tableDataRow5 : 
-        ['Vons', '$10.05', '1.6 miles'],
+        ['Vons'],
       tableDataRow6 : 
-        ['Jimbos', '14.99', '1.1 miles']
+        ['Jimbos']
     }
   }
 
   _alertIndex(index) {
     Alert.alert(`Hi!`);
   }
+  findCoordinates = () => {
+		navigator.geolocation.getCurrentPosition(
+			position => {
+        //console.log(this.state.latitude, this.state.longitude, this.state.loading)
+        this.setState({latitude: position.coords.latitude, longitude: position.coords.longitude, didWork: true, loading:false})
+        //console.log(this.state.latitude, this.state.longitude, this.state.loading)
+        this.getStores()
+			},
+			error => Alert.alert(error.message),
+			{ enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+    );
+  };
 
+  getStores = () =>
+  {
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" + this.state.latitude + "," + this.state.longitude + "&radius=16093.44&type=shop&keyword=store&key=AIzaSyADu-dzTMAsEUjwR7jkQMKg8-eA7NdxXWU"
+    fetch(url)
+    .then((response) => response.json())
+    .then((json) => {
+      console.log(json)
+      var totalCompanies = json.results.length
+      for (var i = 0; i < totalCompanies; i++)
+      {
+        this.state.markersArray.push([json.results[i].geometry.location.lat, json.results[i].geometry.location.lng]);
+        //this.state.tableData.push([json.results[i].name, '0', '0'])
+        //console.log(this.state.tableData)
+        this.setState({loadingStores: false});
+      }
+    })
+  }
+
+  componentDidMount() {
+		this.findCoordinates()
+  }
+  
   render() {
     const { navigation } = this.props;
+    const loading   = this.state.loading;
+    const loadingStores = this.state.loadingStores;
+    //console.log(loading)
     const state = this.state;
     const element = (data, index) => (
       <TouchableOpacity onPress={() => this._alertIndex(index)}>
@@ -50,49 +89,66 @@ export default class Pro extends React.Component {
       </TouchableOpacity>
     );
     return (
-      <Block flex style={styles.container}>
-        <MapContainer />
-        <View style={styles.containerTable}>
-        <Table borderStyle={{borderWidth: 2, borderColor: '#525F7F', borderRadius: 7}}>
-          <Row data={state.tableHead} style={styles.head} textStyle={styles.text}/>
-          <TouchableOpacity style={styles.bigButton} onPress={() => navigation.navigate('Elements')}>
-          <Row data={state.tableDataRow1} textStyle={styles.text}/>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bigButton}>
-          <Row data={state.tableDataRow2} textStyle={styles.text}/>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bigButton}>
-          <Row data={state.tableDataRow3} textStyle={styles.text}/>
-          </TouchableOpacity>   
-          <TouchableOpacity style={styles.bigButton}>
-          <Row data={state.tableDataRow4} textStyle={styles.text}/>
-          </TouchableOpacity>   
-          <TouchableOpacity style={styles.bigButton}>
-          <Row data={state.tableDataRow5} textStyle={styles.text}/>
-          </TouchableOpacity> 
-          <TouchableOpacity style={styles.bigButton}>
-          <Row data={state.tableDataRow6} textStyle={styles.text}/>
-          </TouchableOpacity>     
-    </Table>
+      <Block flex>
+      { loading && loadingStores ? <Image source={loadingGif} style={styles.loading}></Image> : (
+        <Block flex style={styles.container}>
+            <MapView
+            style={styles.myMap}
+            initialRegion={{latitude: this.state.latitude,
+            longitude: this.state.longitude,
+            latitudeDelta: 0.07,
+            longitudeDelta: 0.07}}
+            >
+            {this.state.markersArray[0] != null && this.state.markersArray.map((marker, index) => (
+              <MapView.Marker
+                key = {index}
+                coordinate = {{
+                    latitude: marker[0],
+                    longitude: marker[1]
+                }}
+              />
+              ))
+            }
+            </MapView>
 
-{/*<Table borderStyle={{borderWidth: 2, borderColor: '#525F7F', borderRadius: 7}}>
-          <Row data={state.tableHead} style={styles.head} textStyle={styles.text}/>
-          {
-            state.tableData.map((rowData, index) => (
-              <TableWrapper key={index} style={styles.row}>
-                {
-                  rowData.map((cellData, cellIndex) => (
-                    <TouchableOpacity key={cellIndex} onPress={() => this._alertIndex(index)}>
-                      <Cell key={cellIndex} data={cellIndex === 3 ? element(cellData, index) : cellData} textStyle={styles.text}/>
-                    </TouchableOpacity>
-                    ))
-                }
-              </TableWrapper>
-            ))
-          }
-        </Table>*/}
-      </View>
-      </Block>
+            <View style={styles.containerTable}>
+            <Table borderStyle={{borderWidth: 2, borderColor: '#525F7F', borderRadius: 7}}>
+             <Row data={state.tableHead} style={styles.head} textStyle={styles.text}/>
+
+
+              {/* {this.state.tableData[0] != null && this.state.tableData.map((row, index) => (
+              <TouchableOpacity style={styles.bigButton}
+              >
+                <Row data={row} textStyle={styles.text} />
+              </TouchableOpacity>
+              ))
+            }*/}
+
+
+
+            <TouchableOpacity style={styles.bigButton} onPress={() => navigation.navigate('Elements')}>
+              <Row data={state.tableDataRow1} textStyle={styles.text}/>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.bigButton}>
+              <Row data={state.tableDataRow2} textStyle={styles.text}/>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.bigButton}>
+              <Row data={state.tableDataRow3} textStyle={styles.text}/>
+              </TouchableOpacity>   
+              <TouchableOpacity style={styles.bigButton}>
+              <Row data={state.tableDataRow4} textStyle={styles.text}/>
+              </TouchableOpacity>   
+              <TouchableOpacity style={styles.bigButton}>
+              <Row data={state.tableDataRow5} textStyle={styles.text}/>
+              </TouchableOpacity> 
+              <TouchableOpacity style={styles.bigButton}>
+              <Row data={state.tableDataRow6} textStyle={styles.text}/>
+          </TouchableOpacity>
+            </Table>
+            </View>
+          </Block>
+          )}
+</Block>
     );
   }
 }
@@ -101,6 +157,12 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.COLORS.WHITE,
     marginTop: Platform.OS === 'android' ? -HeaderHeight : 0,
+  },
+  loading: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    marginTop: 100,
   },
   padded: {
     paddingHorizontal: theme.SIZES.BASE * 2,
@@ -148,5 +210,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 20,
     color: 'black'
+  },
+  myMap: {
+    flex: 0.5,
+  },
+  container: {
+    flex: 1,
+  },
+  myText: {
+    position: 'absolute',
+    top: 100,
+    right: 80,
   },
 });

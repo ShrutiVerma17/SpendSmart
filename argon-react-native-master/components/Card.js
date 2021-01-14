@@ -10,7 +10,7 @@ import { argonTheme } from '../constants';
 class Card extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { pressStatus: false };
+    this.state = { pressStatus: false};
     this.onHideUnderlay=this._onHideUnderlay.bind(this);
     this.onShowUnderlay=this._onShowUnderlay.bind(this);
   }  
@@ -21,18 +21,18 @@ _onShowUnderlay() {
     this.setState({ pressStatus: true });
 }
   render() {
-    const { navigation, item, horizontal, full, style, ctaColor, imageStyle } = this.props;
-    const myAlert = () =>
+    const { navigation, item, horizontal, full, style, ctaColor, imageStyle, onClickKeep } = this.props;
+    const myAlert = (title) =>
   Alert.alert(
     "Congratulations!",
     "This item has been added to your basket!",
     [
       {
         text: "Undo",
-        onPress: () => console.log("Cancel Pressed"),
+        onPress: () => {onClick(title)},
         style: "cancel"
       },
-      { text: "Keep", onPress: () => console.log("OK Pressed") }
+      { text: "Keep", onPress: () => {onClickKeep(title)} }
     ],
     { cancelable: false }
 ) ;
@@ -53,7 +53,7 @@ _onShowUnderlay() {
             <Image source={{uri: item.image}} style={imageStyles} />
           </Block>
         </TouchableHighlight>
-        <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={myAlert}>
+        <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={myAlert(item.title)}>
           <Block flex space="between" style={styles.cardDescription}>
             <Text size={24}  style={
                         this.state.pressStatus
@@ -72,6 +72,7 @@ Card.propTypes = {
   full: PropTypes.bool,
   ctaColor: PropTypes.string,
   imageStyle: PropTypes.any,
+  onClickKeep: PropTypes.func,
 }
 
 const styles = StyleSheet.create({

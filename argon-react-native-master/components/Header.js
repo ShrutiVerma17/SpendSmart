@@ -1,6 +1,6 @@
 import React from 'react';
 import { withNavigation } from '@react-navigation/compat';
-import { TouchableOpacity, StyleSheet, Platform, Dimensions, Container } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform, Dimensions, Container } from 'react-native';
 import { Button, Block, NavBar, Text, theme } from 'galio-framework';
 import { Dropdown } from 'react-native-material-dropdown';
 import Icon from './Icon';
@@ -10,10 +10,13 @@ import ModalExample from './ModalExample';
 import argonTheme from '../constants/Theme';
 import { white } from 'color-name';
 import { ThemeColors } from 'react-navigation';
+import {inMyBasket} from '../screens/Home';
+
 
 const { height, width } = Dimensions.get('window');
 const iPhoneX = () => Platform.OS === 'ios' && (height === 812 || width === 812 || height === 896 || width === 896);
-
+let myBasket = []
+let isModalVisible = false
 const BellButton = ({isWhite, style, navigation}) => (
   <TouchableOpacity style={[styles.button, style]} onPress={() => navigation.navigate('Pro')}>
     <Icon
@@ -37,15 +40,27 @@ const BasketButton = ({isWhite, style, navigation}) => (
   </TouchableOpacity>
 );
 
-const DropDownComponent = ({data}) => (
-  <Dropdown
+const onPressBasket = () => {
+  myBasket = {inMyBasket};
+  isModalVisible = true;
+}
+const DropDownComponent = () => (
+  //switch this with a touchable opacity which, on press, calls a function in Home.js that returns the basket
+  <View>
+  <TouchableOpacity
+              onPress = {onPressBasket}
+                >
+                  <Text> Your Basket </Text>
+  </TouchableOpacity>
+  </View>
+  /*<Dropdown
                 label='My Basket'
                 data={data}
                 style ={styles.myDropdown}
                 //containerStyle={styles.myDropdown}
                 //overlayStyle = {styles.overlay}
                 //pickerStyle = {styles.picker}
-                />
+  />*/
 );
 
 const SearchButton = ({isWhite, style, navigation}) => (
@@ -59,6 +74,17 @@ const SearchButton = ({isWhite, style, navigation}) => (
   </TouchableOpacity>
 );
 
+
+const myModal = (shouldShow) => {
+  <Modal
+      animationType="slide"
+      visible={shouldShow}
+    >
+      <Text> Your Basket currently contains: {myBasket}. </Text>
+  </Modal>
+}
+
+
 class Header extends React.Component {
   handleLeftPress = () => {
     const { back, navigation } = this.props;
@@ -66,13 +92,7 @@ class Header extends React.Component {
   }
   renderRight = () => {
     const { white, title, navigation } = this.props;
-    let myData = [{
-      value: 'Apples',
-    }, {
-      value: 'Mango',
-    }, {
-      value: 'Cookies',
-    }];
+    //
     if (title === 'Title') {
       return [
         /*<BellButton key='chat-title' navigation={navigation} isWhite={white} />,*/
@@ -85,7 +105,8 @@ class Header extends React.Component {
       case 'Home':
         return ([
           /*<BellButton key='chat-home' navigation={navigation} isWhite={white} />,*/
-          <DropDownComponent data={myData}/>,
+          <DropDownComponent />,
+          <myModal shouldShow = {isModalVisible} />,
           <BasketButton key='basket-home' navigation={navigation} isWhite={white} />
         ]);
       case 'Deals':
@@ -354,6 +375,7 @@ const styles = StyleSheet.create({
     marginRight: 100,
     top: -7,
     right: 50,
+    color: 'red',
   },
   header: {
     backgroundColor: theme.COLORS.WHITE,
