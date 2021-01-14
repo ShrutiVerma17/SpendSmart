@@ -5,7 +5,7 @@ import { StyleSheet, Dimensions, Image, TouchableWithoutFeedback, TouchableHighl
 import { Block, Text, theme } from 'galio-framework';
 
 import { argonTheme } from '../constants';
-
+import basketImage from './shoppingBasket.jpg'
 
 class Card extends React.Component {
   constructor(props) {
@@ -18,24 +18,24 @@ class Card extends React.Component {
     this.setState({ pressStatus: false });
 }
 _onShowUnderlay() {
-    this.setState({ pressStatus: true });
+    this.setState({ pressStatus: false });
 }
   render() {
-    const { navigation, item, horizontal, full, style, ctaColor, imageStyle, onClickKeep } = this.props;
+    const { navigation, item, horizontal, full, style, ctaColor, imageStyle, onClickKeep, onClickCancel, isCart } = this.props;
     const myAlert = (title) =>
-  Alert.alert(
-    "Congratulations!",
-    "This item has been added to your basket!",
-    [
-      {
-        text: "Undo",
-        onPress: () => {onClick(title)},
-        style: "cancel"
-      },
-      { text: "Keep", onPress: () => {onClickKeep(title)} }
-    ],
-    { cancelable: false }
-) ;
+        Alert.alert(
+          "Congratulations!",
+          "This item has been added to your basket!",
+          [
+            {
+              text: "Undo",
+              onPress: () => {onClickCancel(title)},
+              style: "cancel"
+            },
+            { text: "Keep", onPress: () => {onClickKeep(title)} }
+          ],
+          { cancelable: false }
+      ) ;
     const imageStyles = [
       full ? styles.fullImage : styles.horizontalImage,
       imageStyle
@@ -50,10 +50,24 @@ _onShowUnderlay() {
       <Block row={horizontal} card flex style={cardContainer}>
         <TouchableHighlight underlayColor={'green'}>
           <Block flex style={imgContainer}>
-            <Image source={{uri: item.image}} style={imageStyles} />
+            {isCart ?  <Image source={basketImage} style={imageStyles} />
+            :
+            <Image source={{uri: item.image}} style={imageStyles} />}
           </Block>
         </TouchableHighlight>
-        <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={myAlert(item.title)}>
+        {isCart ?  
+          <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={onClickKeep}>
+          <Block flex space="between" style={styles.cardDescription}>
+            <Text size={24}  style={
+                        this.state.pressStatus
+                            ? styles.cardTitlePressed
+                            : styles.cardTitleNormal}>{item.title}</Text>
+          </Block>
+          </TouchableHighlight>
+        
+        :
+        
+        <TouchableHighlight activeOpacity={0.6} underlayColor="#DDDDDD" onPress={() => myAlert(item.title)}>
           <Block flex space="between" style={styles.cardDescription}>
             <Text size={24}  style={
                         this.state.pressStatus
@@ -61,6 +75,7 @@ _onShowUnderlay() {
                             : styles.cardTitleNormal}>{item.title}</Text>
     </Block>
     </TouchableHighlight>
+        }
       </Block>
     );
   }
@@ -73,6 +88,7 @@ Card.propTypes = {
   ctaColor: PropTypes.string,
   imageStyle: PropTypes.any,
   onClickKeep: PropTypes.func,
+  onClickCancel: PropTypes.func,
 }
 
 const styles = StyleSheet.create({

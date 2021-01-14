@@ -1,6 +1,6 @@
 import React from 'react';
 import { withNavigation } from '@react-navigation/compat';
-import { View, TouchableOpacity, StyleSheet, Platform, Dimensions, Container } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Platform, Dimensions, Container, Modal } from 'react-native';
 import { Button, Block, NavBar, Text, theme } from 'galio-framework';
 import { Dropdown } from 'react-native-material-dropdown';
 import Icon from './Icon';
@@ -10,7 +10,6 @@ import ModalExample from './ModalExample';
 import argonTheme from '../constants/Theme';
 import { white } from 'color-name';
 import { ThemeColors } from 'react-navigation';
-import {inMyBasket} from '../screens/Home';
 
 
 const { height, width } = Dimensions.get('window');
@@ -41,8 +40,9 @@ const BasketButton = ({isWhite, style, navigation}) => (
 );
 
 const onPressBasket = () => {
-  myBasket = {inMyBasket};
-  isModalVisible = true;
+  //myBasket = inMyBasket();
+  //console.log(myBasket);
+  //isModalVisible = true;
 }
 const DropDownComponent = () => (
   //switch this with a touchable opacity which, on press, calls a function in Home.js that returns the basket
@@ -75,13 +75,14 @@ const SearchButton = ({isWhite, style, navigation}) => (
 );
 
 
-const myModal = (shouldShow) => {
+const MyModal = (shouldShow) => {
+  return (
   <Modal
       animationType="slide"
       visible={shouldShow}
     >
       <Text> Your Basket currently contains: {myBasket}. </Text>
-  </Modal>
+  </Modal>);
 }
 
 
@@ -105,8 +106,8 @@ class Header extends React.Component {
       case 'Home':
         return ([
           /*<BellButton key='chat-home' navigation={navigation} isWhite={white} />,*/
-          <DropDownComponent />,
-          <myModal shouldShow = {isModalVisible} />,
+          /*<DropDownComponent />,*/
+          /*<MyModal shouldShow = {isModalVisible} />,*/
           <BasketButton key='basket-home' navigation={navigation} isWhite={white} />
         ]);
       case 'Deals':
@@ -160,17 +161,8 @@ class Header extends React.Component {
           <Text
         center
         style={styles.smallText}>
-          We're glad you could join us. Use the search button below to add items to your basket, or scroll through our specially curated list of your recently searched and favorited items!
+          We're glad you could join us. Use the search button below to add items to your basket, and view your current basket at any time by scrolling down and clicking the "View Your Current Basket" button.
           </Text>
-          <Input
-          right
-          color="black"
-          style={styles.search}
-          placeholder="Search to add an item to your basket"
-          placeholderTextColor={'#8898AA'}
-          onfocus={() => navigation.navigate('Profile')}
-          iconContent={<Icon size={16} color ={theme.COLORS.MUTED} name="search-zoom-in" family="ArgonExtra" />}
-          />
           </Block>
     );
   }

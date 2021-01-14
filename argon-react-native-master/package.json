@@ -28,6 +28,8 @@
     "prop-types": "^15.7.2",
     "react": "16.9.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-36.0.1.tar.gz",
+    "react-native-action-button": "^2.8.5",
+    "react-native-floating-action": "^1.21.0",
     "react-native-gesture-handler": "~1.5.0",
     "react-native-maps": "^0.27.1",
     "react-native-material-dropdown": "^0.11.1",
